@@ -1,0 +1,33 @@
+IBNAME mydata "/courses/d1406ae5ba27fe300 " access=readonly;
+data example1;
+set mydata.gapminder;
+run;
+/* HOW TO CENTERING DATA - CODE IN SAS*/
+/*1. CALCULATE THE MEAN*/
+proc means data = example1 mean;
+var urbanrate;
+output out = example2 mean=m_urban;
+run;
+
+proc sort data=example1;
+by country;
+run;
+/*ADD NEW VARIABLE = VALUE OF CENTERED VARIABLE - MEAN OF THAT VARIABLE*/
+data example;
+merge example1 example2;
+retain mean_urban;
+if _n_=1 then do;
+mean_urban=m_urban;
+end;
+drop _freq_ _type_ m_urban;
+urbanrate_new = urbanrate - mean_urban;
+run;
+/*CHECK THE MEAN IF IT IS CLOSE TO 0*/
+proc means data=example;
+var urbanrate_new;
+run;
+/*LINEAR RELATIONSHIP CHECK*/
+proc glm;
+model incomeperperson=urbanrate/solution;
+run;
+
